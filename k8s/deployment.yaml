@@ -1,0 +1,111 @@
+# Ye batata hai ki hum Kubernetes ke kaunse API group/version ka resource bana rahe hain
+apiVersion: apps/v1
+
+# Resource ka type kya hai
+# Yahan Deployment use ho raha hai, jo pods ko manage karta hai
+kind: Deployment
+
+metadata:
+  # Deployment ka naam
+  # Ye naam kubectl get deployment me dikhai dega
+  name: kubernetes-demo-api
+
+  # Labels extra metadata hote hain
+  # Inse hum resource ko identify aur group karte hain
+  labels:
+    app: kubernetes-demo-api
+
+spec:
+  # Kitne pod instances chalane hain
+  # Yahan 2 replicas ka matlab 2 same pods chalenge
+  replicas: 2
+
+  # Deployment ko kaunse pods manage karne hain
+  # Ye matchLabels pod template ke labels se match hona chahiye
+  selector:
+    matchLabels:
+      app: kubernetes-demo-api
+
+  # Ye pod ka blueprint hota hai
+  # Matlab Deployment naye pods banate time is template ko use karega
+  template:
+    metadata:
+      # Pod ke labels
+      # Ye selector ke labels se match karna zaroori hai
+      labels:
+        app: kubernetes-demo-api
+
+    spec:
+      # Pod ke andar chalne wale containers ki list
+      containers:
+        - name: kubernetes-demo-api
+
+          # Kaunsi Docker image se container chalega
+          # Yahan Docker Hub ki image use ho rahi hai
+          # Agar tum apni image use karna chaho to is naam ko apne Docker Hub username ke hisab se change kar sakte ho
+          image: saifec1127/kubernetes-demo-api:latest
+
+          # Container ke andar kaunsa port app listen kar rahi hai
+          ports:
+            - containerPort: 3000
+
+          # Environment variables jo container ke andar available hongi
+          env:
+            # App ko production mode me chalane ke liye
+            - name: NODE_ENV
+              value: "production"
+
+            # POD_NAME variable dynamically current pod ka naam dega
+            # Ye Kubernetes downward API ka example hai
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  # metadata.name ka matlab current pod ka naam
+                  fieldPath: metadata.name
+
+          # Resources section CPU aur memory ka control karta hai
+          resources:
+            requests:
+              # Minimum CPU jo scheduler consider karega
+              # 100m = 0.1 CPU
+              cpu: "100m"
+
+              # Minimum memory jo pod ko chahiye
+              memory: "128Mi"
+
+            limits:
+              # Maximum CPU jo container use kar sakta hai
+              cpu: "500m"
+
+              # Maximum memory jo container use kar sakta hai
+              memory: "512Mi"
+
+          # Readiness probe check karti hai ki app traffic lene ke liye ready hai ya nahi
+          # Jab tak readiness pass nahi hoti, Service is pod ko traffic nahi bhejti
+          readinessProbe:
+            httpGet:
+              # Ye endpoint app me hona chahiye
+              path: /readyz
+
+              # Kis port par endpoint expose hai
+              port: 3000
+
+            # Container start hone ke kitne seconds baad first check karna hai
+            initialDelaySeconds: 5
+
+            # Har kitne seconds baad readiness check karna hai
+            periodSeconds: 10
+
+          # Liveness probe check karti hai ki app zinda hai ya hang/crash ho gayi hai
+          # Agar liveness fail hoti rahe to Kubernetes container ko restart kar deta hai
+          livenessProbe:
+            httpGet:
+              # Ye health endpoint app me hona chahiye
+              path: /healthz
+              port: 3000
+
+            # Start ke baad pehla liveness check kitne delay ke baad chale
+            initialDelaySeconds: 10
+
+            # Har kitne seconds baad liveness check ho
+            periodSeconds: 20

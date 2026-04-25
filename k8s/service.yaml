@@ -1,0 +1,37 @@
+# Ye batata hai ki hum core Kubernetes API version ka resource bana rahe hain
+apiVersion: v1
+
+# Resource ka type Service hai
+# Service ka kaam pods ko stable network access dena hota hai
+kind: Service
+
+metadata:
+  # Service ka naam
+  name: kubernetes-demo-api-service
+
+  # Labels metadata ke liye hote hain
+  labels:
+    app: kubernetes-demo-api
+
+spec:
+  # Selector batata hai ki ye Service kaunse pods ko target karegi
+  # Jinke labels me app: kubernetes-demo-api hoga, un pods ko ye service select karegi
+  selector:
+    app: kubernetes-demo-api
+
+  # Service kis port par available hogi
+  ports:
+    - protocol: TCP
+
+      # Service ka port
+      # Cluster ke andar doosre resources is service ko is port par access karenge
+      port: 3000
+
+      # Ye target container ka port hai
+      # Service traffic ko pod ke is port par bhejegi
+      targetPort: 3000
+
+  # NodePort ka matlab service cluster ke har node par ek port expose karegi
+  # Local minikube me test karne ke liye useful hai
+  # Cloud me aksar LoadBalancer use hota hai
+  type: NodePort
