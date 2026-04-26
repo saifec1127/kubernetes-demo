@@ -7,7 +7,8 @@
     "verify": "node -e \"console.log('Basic verification passed')\"",
     "dev": "node --watch index.js",
     "start": "node index.js",
-    "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1"
+    "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1",
+    "publish:image": "powershell -ExecutionPolicy Bypass -File build-push.ps1"
   },
   "repository": {
     "type": "git",
