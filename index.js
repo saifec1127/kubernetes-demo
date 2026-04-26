@@ -13,6 +13,15 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/user", (req, res) => {
+  res.json({
+    name: "kubernetes",
+    work: "autometion",
+    relation: "IT Service",
+    time: new Date().toISOString(),
+  });
+});
+
 app.get("/readyz", (req, res) => {
   res.status(200).send("ready");
 });
